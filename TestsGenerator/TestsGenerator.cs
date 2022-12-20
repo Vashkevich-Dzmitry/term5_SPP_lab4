@@ -15,7 +15,13 @@ namespace TestsGenerator
 
             var usings = root.Usings.Select(x => x.Name.ToString()).ToList();
 
-           
+            var classVisitor = new ClassVisitor();
+            classVisitor.Visit(root);
+
+            foreach(var classNode in classVisitor.classes)
+            {
+
+            }
 
             return tests;
         }
