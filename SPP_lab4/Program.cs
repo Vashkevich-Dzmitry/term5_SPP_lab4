@@ -4,16 +4,16 @@
     {
         static async Task Main()
         {
-            string inputDir = "C:\\Study\\Term 5\\SPP\\SPP_lab4\\Input";
-            string outputDir = "C:\\Study\\Term 5\\SPP\\SPP_lab4\\Output";
+            string inputPath = "C:\\Study\\Term 5\\SPP\\SPP_lab4\\Input";
+            string outputPath = "C:\\Study\\Term 5\\SPP\\SPP_lab4\\Output";
             int maxConcurrentInput = 3;
             int maxConcurrentProcessing = 3;
             int maxConcurrentOutput = 3;
 
 
-            if (Directory.Exists(inputDir) && Directory.Exists(outputDir))
+            if (Directory.Exists(inputPath) && Directory.Exists(outputPath))
             {
-                var TestsGenerator = new TestsGenerator.TestsGeneratorPipeline(inputDir, outputDir, maxConcurrentInput, maxConcurrentProcessing, maxConcurrentOutput);
+                var TestsGenerator = new TestsGenerator.TestsGeneratorPipeline(inputPath, outputPath, maxConcurrentInput, maxConcurrentProcessing, maxConcurrentOutput);
                 await TestsGenerator.Run();
             }
         }
