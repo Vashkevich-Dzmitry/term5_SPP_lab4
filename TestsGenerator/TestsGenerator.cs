@@ -13,9 +13,9 @@ namespace TestsGenerator
             SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
             CompilationUnitSyntax root = tree.GetCompilationUnitRoot();
 
-            var usings = root.Usings.Select(x => x.Name.ToString()).ToList();
-
             var classVisitor = new ClassVisitor();
+            var classRewriter = new ClassRewriter();
+
             classVisitor.Visit(root);
 
             foreach (var classNode in classVisitor.classes)
@@ -26,10 +26,24 @@ namespace TestsGenerator
 
                     var classNamespace = GetNamespaceFrom(classNode);
 
+                    if (classNamespace != null)
+                    {
+                        var newUsings = UsingDirective(ParseName(classNamespace));
+                        compilationUnit = compilationUnit.AddUsings(newUsings);
 
+                        var customNamespace = FileScopedNamespaceDeclaration(ParseName(classNamespace + ".Tests"));
+                        compilationUnit = compilationUnit.AddMembers(customNamespace);
+                    }
+                    else
+                    {
+                        var customNamespace = FileScopedNamespaceDeclaration(ParseName("Tests"));
+                        compilationUnit = compilationUnit.AddMembers(customNamespace);
+                    }
+                    var newClassNode = (MemberDeclarationSyntax)classRewriter.Visit(classNode);
+                    compilationUnit = compilationUnit.AddMembers(newClassNode);
+                    tests.Add(compilationUnit.NormalizeWhitespace().ToFullString());
                 }
             }
-
             return tests;
         }
 
