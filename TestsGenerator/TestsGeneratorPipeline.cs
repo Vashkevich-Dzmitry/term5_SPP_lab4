@@ -55,12 +55,17 @@ namespace TestsGenerator
 
         private async Task<string> GetSourceCode(string filePath)
         {
-            return null;
+            string sourceCode;
+            using (var streamReader = new StreamReader(filePath))
+            {
+                sourceCode = await streamReader.ReadToEndAsync();
+            }
+            return sourceCode;
         }
 
-        private async Task<List<string>> GenerateTests(string code)
+        private Task<List<string>> GenerateTests(string code)
         {
-            return null;
+            return Task.FromResult(TestsGenerator.Generate(code)) ;
         }
 
         private async Task WriteTests(string tests)
