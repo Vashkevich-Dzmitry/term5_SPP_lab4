@@ -6,16 +6,16 @@ namespace TestsGenerator
 {
     public class TestsGeneratorPipeline
     {
-        private readonly string _inputDir;
-        private readonly string _outputDir;
+        private readonly string _inputPath;
+        private readonly string _outputPath;
         private readonly int _maxConcurrentInput;
         private readonly int _maxConcurrentProcessing;
         private readonly int _maxConcurrentOutput;
 
-        public TestsGeneratorPipeline(string inputDir, string outputDir, int maxConcurrentInput, int maxConcurrentProcessing, int maxConcurrentOutput)
+        public TestsGeneratorPipeline(string inputPath, string outputPath, int maxConcurrentInput, int maxConcurrentProcessing, int maxConcurrentOutput)
         {
-            _inputDir = inputDir;
-            _outputDir = outputDir;
+            _inputPath = inputPath;
+            _outputPath = outputPath;
             _maxConcurrentInput = maxConcurrentInput;
             _maxConcurrentProcessing = maxConcurrentProcessing;
             _maxConcurrentOutput = maxConcurrentOutput;
@@ -43,7 +43,7 @@ namespace TestsGenerator
             readingBlock.LinkTo(processingBlock, linkOptions);
             processingBlock.LinkTo(writingBlock, linkOptions);
 
-            foreach (var file in Directory.EnumerateFiles(_inputDir))
+            foreach (var file in Directory.EnumerateFiles(_inputPath))
             {
                 bufferBlock.Post(file);
             }
@@ -65,12 +65,17 @@ namespace TestsGenerator
 
         private Task<List<string>> GenerateTests(string code)
         {
-            return Task.FromResult(TestsGenerator.Generate(code)) ;
+            return Task.FromResult(TestsGenerator.Generate(code));
         }
 
         private async Task WriteTests(string tests)
         {
-            return;
+            var fileName = CSharpSyntaxTree.ParseText(tests).GetRoot()
+                .DescendantNodes().OfType<ClassDeclarationSyntax>().First().Identifier.Text;
+
+            using var streamWriter = new StreamWriter($"{_outputPath}\\{fileName}.cs");
+
+            await streamWriter.WriteAsync(tests);
         }
     }
 }
