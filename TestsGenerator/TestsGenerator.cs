@@ -18,12 +18,34 @@ namespace TestsGenerator
             var classVisitor = new ClassVisitor();
             classVisitor.Visit(root);
 
-            foreach(var classNode in classVisitor.classes)
+            foreach (var classNode in classVisitor.classes)
             {
+                if (classNode.Modifiers.Where(modifier => modifier.IsKind(SyntaxKind.PublicKeyword)).Any())
+                {
+                    var compilationUnit = CompilationUnit().WithUsings(root.Usings);
 
+                    var classNamespace = GetNamespaceFrom(classNode);
+
+
+                }
             }
 
             return tests;
+        }
+
+        private static string? GetNamespaceFrom(SyntaxNode syntaxNode)
+        {
+            var result = "";
+            while (syntaxNode.Parent!.GetType() == typeof(NamespaceDeclarationSyntax) ||
+                syntaxNode.Parent!.GetType() == typeof(FileScopedNamespaceDeclarationSyntax))
+            {
+                result = ((NamespaceDeclarationSyntax)syntaxNode.Parent).Name.ToString() + '.' + result;
+                syntaxNode = syntaxNode.Parent;
+            }
+            if (result != "")
+                return result.Remove(result.Length - 1, 1);
+            else
+                return null;
         }
     }
 }
