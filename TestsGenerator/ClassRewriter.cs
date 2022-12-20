@@ -57,7 +57,14 @@ namespace TestsGenerator
         {
             var classIdentifier = classNode.Identifier.Text;
 
-            var newClassNode = classNode.WithIdentifier(Identifier(classIdentifier + "Tests"));
+            var newClassNode = classNode.WithIdentifier(Identifier(classIdentifier + "Tests"))
+                .WithAttributeLists(
+                    SyntaxFactory.SingletonList(
+                        SyntaxFactory.AttributeList(
+                            SyntaxFactory.SingletonSeparatedList(
+                                SyntaxFactory.Attribute(
+                                    SyntaxFactory.IdentifierName(
+                                        "TestFixture"))))));
 
             var methodNames = classNode.ChildNodes()
                 .Where(x => x.GetType() == typeof(MethodDeclarationSyntax) && ((MethodDeclarationSyntax)x).Modifiers

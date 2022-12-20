@@ -22,7 +22,14 @@ namespace TestsGenerator
             {
                 if (classNode.Modifiers.Where(modifier => modifier.IsKind(SyntaxKind.PublicKeyword)).Any())
                 {
+                    var newClassNode = new SyntaxList<MemberDeclarationSyntax>((MemberDeclarationSyntax)classRewriter.Visit(classNode));
+
                     var compilationUnit = CompilationUnit().WithUsings(root.Usings);
+
+                    compilationUnit = compilationUnit.AddUsings(SyntaxFactory.UsingDirective(
+                        SyntaxFactory.QualifiedName(
+                            SyntaxFactory.IdentifierName("NUnit"),
+                                SyntaxFactory.IdentifierName("Framework"))));
 
                     var classNamespace = GetNamespaceFrom(classNode);
 
@@ -31,16 +38,17 @@ namespace TestsGenerator
                         var newUsings = UsingDirective(ParseName(classNamespace));
                         compilationUnit = compilationUnit.AddUsings(newUsings);
 
-                        var customNamespace = FileScopedNamespaceDeclaration(ParseName(classNamespace + ".Tests"));
+                        var customNamespace = NamespaceDeclaration(ParseName(classNamespace + ".Tests"));
+                        customNamespace = customNamespace.WithMembers(newClassNode);
                         compilationUnit = compilationUnit.AddMembers(customNamespace);
                     }
                     else
                     {
-                        var customNamespace = FileScopedNamespaceDeclaration(ParseName("Tests"));
+                        var customNamespace = NamespaceDeclaration(ParseName("Tests"));
+                        customNamespace = customNamespace.WithMembers(newClassNode);
                         compilationUnit = compilationUnit.AddMembers(customNamespace);
                     }
-                    var newClassNode = (MemberDeclarationSyntax)classRewriter.Visit(classNode);
-                    compilationUnit = compilationUnit.AddMembers(newClassNode);
+
                     tests.Add(compilationUnit.NormalizeWhitespace().ToFullString());
                 }
             }
